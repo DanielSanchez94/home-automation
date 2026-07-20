@@ -21,7 +21,7 @@ services:
 
   go2rtc:
     container_name: go2rtc
-    image: ghcr.io/alexxit/go2rtc:v1.9.14
+    image: ghcr.io/alexxit/go2rtc:latest
     network_mode: host
     restart: unless-stopped
     environment:
