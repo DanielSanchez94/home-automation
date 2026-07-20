@@ -265,51 +265,18 @@
     subtype: button_1
     id: pulsacion_simple
     trigger: device
-  - trigger: event
-    event_type: zha_event
-    event_data:
-      device_id: ddfd4161065603c69f912b7f069ab7b3
-      command: remote_button_short_press
-    id: pulsacion_simple
-  - trigger: event
-    event_type: zha_event
-    event_data:
-      device_id: ddfd4161065603c69f912b7f069ab7b3
-      args:
-      - 1
-    id: pulsacion_simple
   - domain: zha
     device_id: ddfd4161065603c69f912b7f069ab7b3
     type: remote_button_double_press
     subtype: button_1
     id: pulsacion_simple
     trigger: device
-  - trigger: event
-    event_type: zha_event
-    event_data:
-      device_id: ddfd4161065603c69f912b7f069ab7b3
-      command: remote_button_double_press
-    id: pulsacion_simple
-  - trigger: event
-    event_type: zha_event
-    event_data:
-      device_id: ddfd4161065603c69f912b7f069ab7b3
-      args:
-      - 2
-    id: pulsacion_simple
   - domain: zha
     device_id: ddfd4161065603c69f912b7f069ab7b3
     type: remote_button_long_press
     subtype: button_1
     id: pulsacion_larga
     trigger: device
-  - trigger: event
-    event_type: zha_event
-    event_data:
-      device_id: ddfd4161065603c69f912b7f069ab7b3
-      args:
-      - 3
-    id: pulsacion_larga
   actions:
   - choose:
     - conditions:

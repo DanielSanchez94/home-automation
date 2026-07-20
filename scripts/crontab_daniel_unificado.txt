@@ -26,7 +26,7 @@
 # Se ejecuta diariamente a las 3:00 AM.
 # Busca archivos en el directorio de grabaciones.
 # Nota: La línea del comando original estaba truncada. Se incluye tal cual se proporcionó.
-0 3 * * * /usr/bin/find /home/daniel/homeAssistantProject/recordings/ -type f -name "*.m
+0 3 * * * /usr/bin/find /home/daniel/homeAssistantProject/recordings/ -type f -name "*.mp4" -mtime +60 -delete
 
 # Tarea para realizar una copia de seguridad automática de Home Assistant.
 # Se ejecuta diariamente a las 4:00 AM.

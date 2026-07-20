@@ -5,25 +5,37 @@ services:
     volumes:
       - ./homeassistant:/config
       - /etc/localtime:/etc/localtime:ro
-      - /home/daniel/homeAssistantProject/recordings:/media/recordings
+      - ${PROJECT_PATH}/recordings:/media/recordings
       - /run/dbus:/run/dbus:ro
     network_mode: host
     restart: unless-stopped
     privileged: true
     devices:
       - /dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_94420e1ce7f3ef119484bd1b6d9880ab-if00-port0:/dev/ttyUSB0
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8123/api/"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
 
   go2rtc:
     container_name: go2rtc
-    image: ghcr.io/alexxit/go2rtc:latest
+    image: ghcr.io/alexxit/go2rtc:v1.9.14
     network_mode: host
     restart: unless-stopped
     environment:
       - TAPO_USER=${TAPO_USER}
       - TAPO_PASSWORD=${TAPO_PASSWORD}
     volumes:
-      - /home/daniel/homeAssistantProject/go2rtc:/config
-      - /home/daniel/homeAssistantProject/recordings:/recordings
+      - ${PROJECT_PATH}/go2rtc:/config
+      - ${PROJECT_PATH}/recordings:/recordings
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:1984/"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   nut-server:
     image: instantlinux/nut-upsd:latest
