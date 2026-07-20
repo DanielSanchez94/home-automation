@@ -1,0 +1,72 @@
+# Configuración base y carpeta de grabaciones
+homeassistant:
+  media_dirs:
+    recordings: /media/recordings
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# Configuración Yeelight LAN
+yeelight:
+  devices:
+    192.168.0.172:  # reemplazá con la IP de tu foco
+      name: Foco Oficina
+      model: color2  # Yeelight Smart LED Bulb 1S (Color)
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+    - ::1
+  cors_allowed_origins:
+    - https://homesmart.ar
+ffmpeg:
+
+template:
+  - binary_sensor:
+      - name: "Movimiento Tapo Living 10s"
+        unique_id: "tapo_living_10s_delay"
+        device_class: motion
+        state: "{{ is_state('binary_sensor.tapo_c200_cell_motion_detection', 'on') }}"
+        delay_off:
+          seconds: 10
+
+# ------------------------------
+# Template sensors para UPS
+# ------------------------------
+  - sensor:
+    - name: "UPS Battery Estimada"
+      unique_id: "ups_battery_estimada_calculada"
+      unit_of_measurement: "%"
+      device_class: battery
+      state: >
+        {% set v = states('sensor.ups_tension_de_la_bateria') | float(0) %}
+        {% if v == 0 or is_state('sensor.ups_tension_de_la_bateria', 'unknown') %}
+          unknown
+        {# 100% es el voltaje inicial bajo carga #}
+        {% elif v >= 25.8 %} 100
+        {% elif v >= 25.5 %} 90
+        {% elif v >= 25.3 %} 80
+        {% elif v >= 25.1 %} 70
+        {% elif v >= 24.9 %} 60
+        {% elif v >= 24.7 %} 50
+        {% elif v >= 24.5 %} 40
+        {% elif v >= 24.3 %} 30
+        {% elif v >= 24.1 %} 20
+        {% elif v >= 23.9 %} 10
+        {# Punto de pánico/apagado #}
+        {% elif v >= 23.8 %} 5
+        {% else %} 0
+        {% endif %}
+
+shell_command:
+  frenar_ups_y_esperar_luz: !secret ups_shutdown_command

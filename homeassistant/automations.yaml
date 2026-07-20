@@ -1,0 +1,357 @@
+- id: movimiento_prendo_luces
+  alias: Sistema seguridad
+  description: Sirena solo si hay luz (OL). Notificación crítica si hay corte (OB)
+    para evitar bloqueos del enchufe Zigbee.
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.sensor_movimiento_snzb_03p_ocupacion
+    - binary_sensor.movimiento_tapo_living_10s
+    - binary_sensor.sensor_puerta_living
+    - binary_sensor.sensor_puerta_ventana_garage
+    id: alguien_entro
+    to: 'on'
+  - trigger: state
+    entity_id:
+    - binary_sensor.sensor_movimiento_snzb_03p_ocupacion
+    - binary_sensor.movimiento_tapo_living_10s
+    - binary_sensor.sensor_puerta_living
+    - binary_sensor.sensor_puerta_ventana_garage
+    id: nadie_en_la_oficina
+    to: 'off'
+    for:
+      minutes: 2
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: alguien_entro
+      - condition: template
+        value_template: "{{ states('sensor.sm_a546e_wi_fi_connection') not in ['limalimon','naranjamandarina']
+          and \n   states('sensor.iphone_de_agostina_ssid') not in ['limalimon','naranjamandarina']
+          }}\n"
+      - condition: or
+        conditions:
+        - condition: template
+          value_template: "{{ trigger.entity_id in [\n  'binary_sensor.sensor_puerta_living',\n
+            \ 'binary_sensor.sensor_puerta_ventana_garage'\n] }}\n"
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: sensor.ups_datos_de_estado
+            state: OL
+          - condition: state
+            entity_id: binary_sensor.sensor_movimiento_snzb_03p_ocupacion
+            state: 'on'
+          - condition: state
+            entity_id: binary_sensor.movimiento_tapo_living_10s
+            state: 'on'
+        - condition: and
+          conditions:
+          - condition: state
+            entity_id: sensor.ups_datos_de_estado
+            state: OB
+          - condition: state
+            entity_id: binary_sensor.sensor_movimiento_snzb_03p_ocupacion
+            state: 'on'
+      sequence:
+      - if:
+        - condition: state
+          entity_id: sensor.ups_datos_de_estado
+          state: OL
+        then:
+        - action: switch.turn_on
+          target:
+            entity_id: switch.enchufe
+        else:
+        - stop: 'Corte de luz detectado: se omite activación de sirena.'
+      - data:
+          title: "\U0001F6A8 ALARMA {% if is_state('sensor.ups_datos_de_estado', 'OB')
+            %}(MODO BATERÍA){% endif %}"
+          message: "{{ trigger.to_state.name }} activado. {% if is_state('sensor.ups_datos_de_estado',
+            'OB') %}\n  ⚠️ Sirena NO encendida por falta de red eléctrica.\n{% else
+            %}\n  \U0001F50A Sirena ENCENDIDA.\n{% endif %}"
+          data:
+            priority: high
+            ttl: 0
+        action: notify.mobile_app_celu_bostezo
+      - data:
+          title: "\U0001F6A8 ALARMA ACTIVADA"
+          message: 'Alerta: {{ trigger.to_state.name }} activado.'
+          data:
+            push:
+              sound: default
+            priority: high
+        action: notify.mobile_app_iphone_de_agostina
+    - conditions:
+      - condition: trigger
+        id: nadie_en_la_oficina
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.enchufe
+  mode: restart
+- id: '1773681158191'
+  alias: 'Iluminación Inteligente: Yeelight Dormitorio'
+  description: Ajusta color y brillo según horario (Rojo 100% / Rojo 50% / Cálido)
+  triggers:
+  - trigger: state
+    entity_id: light.foco_yeelight
+    from: 'off'
+    to: 'on'
+  actions:
+  - choose:
+    - conditions:
+      - condition: time
+        after: '20:00:00'
+        before: 00:00:00
+      sequence:
+      - target:
+          entity_id: light.foco_yeelight
+        data:
+          rgb_color:
+          - 255
+          - 0
+          - 0
+          brightness_pct: 100
+        action: light.turn_on
+    - conditions:
+      - condition: time
+        after: 00:00:00
+        before: 08:00:00
+      sequence:
+      - target:
+          entity_id: light.foco_yeelight
+        data:
+          rgb_color:
+          - 255
+          - 0
+          - 0
+          brightness_pct: 50
+        action: light.turn_on
+    - conditions: []
+      sequence:
+      - target:
+          entity_id: light.foco_yeelight
+        data:
+          kelvin: 2700
+          brightness_pct: 80
+        action: light.turn_on
+  mode: restart
+- id: '1773779087985'
+  alias: 'Vigilancia: Grabar Eventos Tapo'
+  description: Graba 30s en SD solo si AMBOS teléfonos están fuera de las redes de
+    casa.
+  triggers:
+  - entity_id: binary_sensor.tapo_c200_cell_motion_detection
+    to: 'on'
+    trigger: state
+  - entity_id: binary_sensor.tapo_c200_noise
+    to: 'on'
+    trigger: state
+  conditions:
+  - condition: template
+    value_template: '{# Definimos las redes de tu casa #} {% set redes_casa = [''limalimon'',
+      ''naranjamandarina''] %}
+
+      {# Verificamos que ninguno esté conectado a las redes de casa #} {% set dani_fuera
+      = states(''sensor.sm_a546e_wi_fi_connection'') not in redes_casa %} {% set agos_fuera
+      = states(''sensor.iphone_de_agostina_ssid'') not in redes_casa %}
+
+      {# Solo graba si AMBOS están fuera de las redes de casa #} {{ dani_fuera and
+      agos_fuera }}
+
+      '
+  actions:
+  - action: camera.record
+    target:
+      entity_id: camera.tapo_c200_sd_stream
+    data:
+      duration: 30
+      lookback: 2
+      filename: /media/recordings/{{ trigger.to_state.name | replace(' ', '_') | lower
+        }}_{{ now().strftime('%Y%m%d_%H%M%S') }}.mp4
+  mode: queued
+  max: 10
+- id: '1775677129166'
+  alias: 'Servidor: Gestión Integral de Energía'
+  description: Avisos de consumo y apagado controlado con frenado de UPS
+  triggers:
+  - trigger: state
+    entity_id: sensor.ups_datos_de_estado
+    from: OL
+    to: OB
+    id: inicio_corte
+  - trigger: numeric_state
+    entity_id: sensor.ups_battery_estimada
+    below: 76
+    id: bateria_75
+  - trigger: numeric_state
+    entity_id: sensor.ups_battery_estimada
+    below: 51
+    id: bateria_50
+  - trigger: numeric_state
+    entity_id: sensor.ups_battery_estimada
+    below: 26
+    id: bateria_25
+  - trigger: numeric_state
+    entity_id: sensor.ups_battery_estimada
+    below: 16
+    for:
+      seconds: 30
+    id: bateria_critica
+  - trigger: state
+    entity_id: sensor.ups_datos_de_estado
+    from: OB
+    to: OL
+    id: luz_regreso
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: inicio_corte
+      sequence:
+      - action: notify.mobile_app_celu_bostezo
+        data:
+          title: "\U0001F50C Corte de Energía"
+          message: 'El servidor pasó a batería. Autonomía estimada: 2h 40m.'
+          data:
+            priority: high
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: bateria_75
+        - condition: trigger
+          id: bateria_50
+        - condition: trigger
+          id: bateria_25
+      sequence:
+      - action: notify.mobile_app_celu_bostezo
+        data:
+          title: "\U0001FAAB Info Batería"
+          message: La carga bajó del {{ trigger.to_state.state }}%.
+    - conditions:
+      - condition: trigger
+        id: bateria_critica
+      - condition: state
+        entity_id: sensor.ups_datos_de_estado
+        state: OB
+      sequence:
+      - action: notify.mobile_app_celu_bostezo
+        data:
+          title: '⚠️ EMERGENCIA: APAGADO'
+          message: Batería al 15%. Frenando UPS y cerrando sistema...
+      - action: shell_command.frenar_ups_y_esperar_luz
+      - delay: 00:00:15
+      - action: hassio.host_shutdown
+    - conditions:
+      - condition: trigger
+        id: luz_regreso
+      sequence:
+      - action: notify.mobile_app_celu_bostezo
+        data:
+          title: ✅ Luz Restablecida
+          message: El sistema vuelve a red eléctrica y está cargando.
+  mode: parallel
+- id: '1778262463774'
+  alias: 'Dormitorio: Control Luz con Botón'
+  description: Pulsación simple/doble para toggle de encendido, pulsación larga para
+    toggle entre rojo y blanco cálido (2700K).
+  triggers:
+  - domain: zha
+    device_id: ddfd4161065603c69f912b7f069ab7b3
+    type: remote_button_short_press
+    subtype: button_1
+    id: pulsacion_simple
+    trigger: device
+  - trigger: event
+    event_type: zha_event
+    event_data:
+      device_id: ddfd4161065603c69f912b7f069ab7b3
+      command: remote_button_short_press
+    id: pulsacion_simple
+  - trigger: event
+    event_type: zha_event
+    event_data:
+      device_id: ddfd4161065603c69f912b7f069ab7b3
+      args:
+      - 1
+    id: pulsacion_simple
+  - domain: zha
+    device_id: ddfd4161065603c69f912b7f069ab7b3
+    type: remote_button_double_press
+    subtype: button_1
+    id: pulsacion_simple
+    trigger: device
+  - trigger: event
+    event_type: zha_event
+    event_data:
+      device_id: ddfd4161065603c69f912b7f069ab7b3
+      command: remote_button_double_press
+    id: pulsacion_simple
+  - trigger: event
+    event_type: zha_event
+    event_data:
+      device_id: ddfd4161065603c69f912b7f069ab7b3
+      args:
+      - 2
+    id: pulsacion_simple
+  - domain: zha
+    device_id: ddfd4161065603c69f912b7f069ab7b3
+    type: remote_button_long_press
+    subtype: button_1
+    id: pulsacion_larga
+    trigger: device
+  - trigger: event
+    event_type: zha_event
+    event_data:
+      device_id: ddfd4161065603c69f912b7f069ab7b3
+      args:
+      - 3
+    id: pulsacion_larga
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: pulsacion_simple
+      sequence:
+      - action: light.toggle
+        target:
+          entity_id: light.foco_yeelight
+      - delay:
+          milliseconds: 200
+    - conditions:
+      - condition: trigger
+        id: pulsacion_larga
+      - condition: state
+        entity_id: light.foco_yeelight
+        state: 'on'
+      - condition: template
+        value_template: '{{ is_state_attr(''light.foco_yeelight'', ''rgb_color'',
+          (255, 0, 0)) }}'
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: light.foco_yeelight
+        data:
+          kelvin: 2700
+          brightness_pct: 80
+      - delay:
+          milliseconds: 200
+    - conditions:
+      - condition: trigger
+        id: pulsacion_larga
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: light.foco_yeelight
+        data:
+          rgb_color:
+          - 255
+          - 0
+          - 0
+          brightness_pct: 100
+      - delay:
+          milliseconds: 200
+  mode: single

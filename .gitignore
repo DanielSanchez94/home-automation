@@ -1,0 +1,51 @@
+# ============================================================
+#  Home Assistant / home-automation  ->  .gitignore
+#  Repo PÚBLICO: nunca versionar secretos, credenciales ni datos.
+# ============================================================
+
+# ---- Secretos y credenciales ----
+secrets.yaml
+.env
+rclone/config/rclone.conf
+rclone/
+**/.storage/
+**/.cloud/
+
+# ---- Videos y grabaciones ----
+recordings/
+homeassistant/www/tapo_control/**/videos/
+homeassistant/www/tapo_control/**/thumbs/
+*.mp4
+*.mp4.tmp
+*.mkv
+*.mov
+*.avi
+
+# ---- Bases de datos ----
+*.db
+*.db-shm
+*.db-wal
+
+# ---- Logs ----
+*.log
+*.log.*
+*.log.fault
+backup_log.txt
+
+# ---- Backups ----
+backups/
+
+# ---- Runtime / estado de Home Assistant ----
+homeassistant/deps/
+homeassistant/tts/
+homeassistant/.HA_VERSION
+homeassistant/.ha_run.lock
+home-assistant.log*
+
+# ---- Config duplicada (montaje residual con su propio .storage/db/secrets) ----
+homeassistant/config/
+
+# ---- Varios ----
+.DS_Store
+*.pyc
+__pycache__/

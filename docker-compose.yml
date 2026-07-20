@@ -1,0 +1,42 @@
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: ghcr.io/home-assistant/home-assistant:stable
+    volumes:
+      - ./homeassistant:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /home/daniel/homeAssistantProject/recordings:/media/recordings
+      - /run/dbus:/run/dbus:ro
+    network_mode: host
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_94420e1ce7f3ef119484bd1b6d9880ab-if00-port0:/dev/ttyUSB0
+
+  go2rtc:
+    container_name: go2rtc
+    image: ghcr.io/alexxit/go2rtc:latest
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - TAPO_USER=${TAPO_USER}
+      - TAPO_PASSWORD=${TAPO_PASSWORD}
+    volumes:
+      - /home/daniel/homeAssistantProject/go2rtc:/config
+      - /home/daniel/homeAssistantProject/recordings:/recordings
+
+  nut-server:
+    image: instantlinux/nut-upsd:latest
+    container_name: nut-server
+    privileged: true
+    network_mode: host
+    restart: unless-stopped
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    environment:
+      - API_USER=admin
+      - API_PASSWORD=${NUT_API_PASSWORD}
+      - UPS_NAME=ups
+      - UPS_DESC=Lyonn CTB-1200
+      - DRIVER=nutdrv_qx
+      - PORT=auto
