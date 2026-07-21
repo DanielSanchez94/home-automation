@@ -8,13 +8,26 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Install cloudflared
+        run: |
+          wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared-linux-amd64.deb
+
       - name: SSH deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          proxy_host: ssh.lenovoserver.com.ar
+          proxy_port: 22
+          proxy_username: ${{ secrets.SSH_USER }}
+          proxy_key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/daniel/home-automation
             git pull
             docker compose up -d --pull never
+          request_pty: true
+        env:
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
