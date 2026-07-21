@@ -1,5 +1,5 @@
 streams:
-  tapo: rtsp://${TAPO_USER}:${TAPO_PASSWORD}@192.168.0.173:554/stream1
+  tapo: rtsp://${TAPO_USER}:${TAPO_PASSWORD}@192.168.1.22:554/stream1
 
 api:
   listen: ":1984"
