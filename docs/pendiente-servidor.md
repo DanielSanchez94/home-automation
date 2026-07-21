@@ -1,41 +1,26 @@
 # Tareas pendientes en el servidor
 
-Acciones que hay que ejecutar manualmente en el servidor (lenovo-server)
-luego de cada sesión de mejoras en el repo.
+Acciones que hay que ejecutar manualmente en el servidor (lenovo-server).
 
 ---
 
-## Sesión 1 — Rutas parametrizadas + crontab
-
-- [ ] Agregar `PROJECT_PATH=/home/daniel/homeAssistantProject` al `.env` real del servidor
-- [ ] Verificar que el crontab activo tiene la línea de limpieza completa:
-  ```
-  0 3 * * * /usr/bin/find /home/daniel/homeAssistantProject/recordings/ -type f -name "*.mp4" -mtime +60 -delete
-  ```
-  Si no, actualizarlo con `crontab -e`
-- [ ] Reiniciar el stack para que docker compose tome el nuevo `PROJECT_PATH`:
-  ```bash
-  docker compose down && docker compose up -d
-  ```
-
----
-
-## Sesión 2 — Versión fija de go2rtc
-
-- [ ] Recrear el contenedor go2rtc para que use la imagen `v1.9.14` en lugar de `:latest`:
-  ```bash
-  docker compose up -d --pull always go2rtc
-  ```
-
----
-
-## Sesión 3 — Cloudflared desactualizado
+## Pendiente
 
 - [ ] Actualizar cloudflared de `2026.2.0` a `2026.7.2`:
   ```bash
   sudo cloudflared update
   sudo systemctl restart cloudflared
   systemctl status cloudflared
+  ```
+
+- [ ] Actualizar el crontab activo para que apunte a la nueva ruta del repo.
+  Ejecutar `crontab -e` y reemplazar la línea de limpieza de grabaciones:
+  ```
+  0 3 * * * /usr/bin/find /home/daniel/homeAssistantProject/recordings/ -type f -name "*.mp4" -mtime +60 -delete
+  ```
+  Y la línea del backup:
+  ```
+  0 4 * * * /home/daniel/home-automation/scripts/auto_backup_ha.sh >> /home/daniel/backup_log.txt 2>&1
   ```
 
 ---
@@ -51,10 +36,9 @@ Si el disco falla, se pierden los backups también.
 
 ---
 
-## Pendiente futuro — Script de deploy (sync repo → servidor)
+## Resuelto
 
-Objetivo: que al hacer `git push` en la PC, el servidor se actualice solo.
-Opciones a evaluar:
-- Script `deploy.sh` que haga `git pull` + `docker compose up -d --pull` en el servidor
-- GitHub Action con webhook que dispare el deploy al hacer push
-- Requisito previo: tener el repo clonado en el servidor en la ruta correcta y el `.env` configurado
+- [x] Agregar `PROJECT_PATH` al `.env` real del servidor
+- [x] Stack migrado de `~/homeAssistantProject` a `~/home-automation`
+- [x] Deploy automático funcionando via GitHub Actions + Cloudflare
+- [x] go2rtc fijado en versión `2026.7.2` en el workflow

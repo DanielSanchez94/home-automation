@@ -13,7 +13,7 @@ services:
     devices:
       - /dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_94420e1ce7f3ef119484bd1b6d9880ab-if00-port0:/dev/ttyUSB0
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8123/api/"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8123/manifest.json"]
       interval: 60s
       timeout: 10s
       retries: 3
