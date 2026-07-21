@@ -35,7 +35,7 @@ Configuración de mi instalación de **Home Assistant** + servicios asociados
 
 ### Wi-Fi LAN
 * Iluminación: Yeelight en modo LAN (IP fija: 192.168.0.172)
-* Cámara: Tapo C200 — streaming local y detección de eventos (IP fija: 192.168.0.173)
+* Cámara: Tapo C200 — streaming local y detección de eventos (IP fija: 192.168.1.22)
 
 ## 🛡️ Sistema de seguridad
 
@@ -56,13 +56,35 @@ Automatización Yeelight Dormitorio (ciclo circadiano):
 ## 🔐 Secretos
 
 Este repositorio es **público** — ningún secreto está versionado.
-Antes de arrancar el stack creá los archivos a partir de sus plantillas:
+
+### 1. Crear `.env`
 
 ```bash
 cp .env.example .env
-cp homeassistant/secrets.yaml.example homeassistant/secrets.yaml
-# editá ambos con los valores reales
 ```
+
+Editalo con los valores reales:
+
+```env
+PROJECT_PATH=/home/daniel/home-automation
+NUT_API_PASSWORD=tu_password_nut
+TAPO_USER=tu_usuario_tapo
+TAPO_PASSWORD=tu_password_tapo
+```
+
+### 2. Crear `homeassistant/secrets.yaml`
+
+```bash
+nano homeassistant/secrets.yaml
+```
+
+Contenido:
+
+```yaml
+ups_shutdown_command: "docker exec nut-server upscmd -u admin -p TU_PASSWORD_NUT ups shutdown.return"
+```
+
+> El valor de `TU_PASSWORD_NUT` debe coincidir con `NUT_API_PASSWORD` del `.env`.
 
 ## 🚀 Arranque
 
@@ -101,7 +123,7 @@ docker logs -f homeassistant                          # logs de HA
 docker ps                                             # estado contenedores
 cd ~/home-automation && docker compose restart        # reiniciar stack
 df -h                                                 # espacio en disco
-du -sh ~/homeAssistantProject/recordings              # peso de grabaciones
+du -sh ~/home-automation/recordings                   # peso de grabaciones
 ```
 
 ## 🚫 Qué NO está en el repo
