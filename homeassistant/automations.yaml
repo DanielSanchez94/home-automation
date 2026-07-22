@@ -280,19 +280,19 @@
   - domain: zha
     device_id: 444a4c9b26c76bb34b5d76a2acaf5fc5
     type: remote_button_short_press
-    subtype: button_1
+    subtype: button
     id: pulsacion_simple
     trigger: device
   - domain: zha
     device_id: 444a4c9b26c76bb34b5d76a2acaf5fc5
     type: remote_button_double_press
-    subtype: button_1
+    subtype: button
     id: pulsacion_simple
     trigger: device
   - domain: zha
     device_id: 444a4c9b26c76bb34b5d76a2acaf5fc5
     type: remote_button_long_press
-    subtype: button_1
+    subtype: button
     id: pulsacion_larga
     trigger: device
   actions:
