@@ -5,6 +5,11 @@ homeassistant:
   media_dirs:
     recordings: /media/recordings
 
+logger:
+  default: warning
+  logs:
+    custom_components.tapo_control: debug
+
 # Loads default set of integrations. Do not remove.
 default_config:
 
