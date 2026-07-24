@@ -20,10 +20,3 @@ Si el disco falla, se pierden los backups también.
 - El `.gitignore` ya tiene `rclone/` excluido, listo para versionar la config cuando se implemente
 
 ---
-
-## Resuelto
-
-- [x] Agregar `PROJECT_PATH` al `.env` real del servidor
-- [x] Stack migrado de `~/homeAssistantProject` a `~/home-automation`
-- [x] Deploy automático funcionando via GitHub Actions + Cloudflare
-- [x] go2rtc fijado en versión `2026.7.2` en el workflow

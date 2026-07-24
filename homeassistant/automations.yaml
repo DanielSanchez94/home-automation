@@ -340,3 +340,46 @@
       - delay:
           milliseconds: 200
   mode: single
+
+- id: '1784856100000'
+  alias: 'Webhook: Activar alarma'
+  description: Permite activar la alarma desde el panel de control de terceros.
+  triggers:
+  - trigger: webhook
+    webhook_id: X_AhNFT-mL6g519Sw_d2WPl9TJwQ3pNH
+    allowed_methods:
+    - POST
+    local_only: false
+  actions:
+  - action: automation.turn_on
+    target:
+      entity_id: automation.sistema_seguridad
+  mode: single
+- id: '1784856200000'
+  alias: 'Webhook: Desactivar alarma'
+  description: Permite desactivar la alarma desde el panel de control de terceros.
+  triggers:
+  - trigger: webhook
+    webhook_id: DOULmPfn8km-0UUMPNjxjSE3UtDHQKnM
+    allowed_methods:
+    - POST
+    local_only: false
+  actions:
+  - action: automation.turn_off
+    target:
+      entity_id: automation.sistema_seguridad
+  mode: single
+- id: '1784856300000'
+  alias: 'Webhook: Apagar sirena'
+  description: Permite apagar la sirena desde el panel de control de terceros.
+  triggers:
+  - trigger: webhook
+    webhook_id: KnTbvOQogVPShquavni4MXRirJmtgyk3
+    allowed_methods:
+    - POST
+    local_only: false
+  actions:
+  - action: switch.turn_off
+    target:
+      entity_id: switch.enchufe
+  mode: single

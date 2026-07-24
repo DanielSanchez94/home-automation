@@ -11,6 +11,10 @@ rclone/
 **/.storage/
 **/.cloud/
 
+# ---- HACS / custom components (se instalan via HACS) ----
+homeassistant/custom_components/
+homeassistant/blueprints/
+
 # ---- Videos y grabaciones ----
 recordings/
 homeassistant/www/tapo_control/**/videos/
