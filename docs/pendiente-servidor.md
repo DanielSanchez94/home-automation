@@ -6,22 +6,7 @@ Acciones que hay que ejecutar manualmente en el servidor (lenovo-server).
 
 ## Pendiente
 
-- [ ] Actualizar cloudflared de `2026.2.0` a `2026.7.2`:
-  ```bash
-  sudo cloudflared update
-  sudo systemctl restart cloudflared
-  systemctl status cloudflared
-  ```
-
-- [ ] Actualizar el crontab activo para que apunte a la nueva ruta del repo.
-  Ejecutar `crontab -e` y reemplazar la línea de limpieza de grabaciones:
-  ```
-  0 3 * * * /usr/bin/find /home/daniel/homeAssistantProject/recordings/ -type f -name "*.mp4" -mtime +60 -delete
-  ```
-  Y la línea del backup:
-  ```
-  0 4 * * * /home/daniel/home-automation/scripts/auto_backup_ha.sh >> /home/daniel/backup_log.txt 2>&1
-  ```
+_(Sin tareas pendientes actualmente)_
 
 ---
 

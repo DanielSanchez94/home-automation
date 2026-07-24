@@ -9,7 +9,8 @@ services:
       - /run/dbus:/run/dbus:ro
     network_mode: host
     restart: unless-stopped
-    privileged: true
+    cap_add:
+      - SYS_RAWIO
     devices:
       - /dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_94420e1ce7f3ef119484bd1b6d9880ab-if00-port0:/dev/ttyUSB0
     healthcheck:
@@ -21,7 +22,7 @@ services:
 
   go2rtc:
     container_name: go2rtc
-    image: ghcr.io/alexxit/go2rtc:latest
+    image: ghcr.io/alexxit/go2rtc:v1.9.14
     network_mode: host
     restart: unless-stopped
     environment:

@@ -24,6 +24,7 @@ Configuración de mi instalación de **Home Assistant** + servicios asociados
 | `homeassistant/` | Configuración de Home Assistant (YAML, automatizaciones) |
 | `go2rtc/` | Configuración de go2rtc (streaming RTSP/WebRTC) |
 | `scripts/` | Backup automático y crontab |
+| `docs/` | Tareas pendientes y notas del servidor |
 | `.env.example` | Plantilla de variables de entorno |
 
 ## 🔌 Conectividad y protocolos
@@ -52,6 +53,25 @@ Automatización Yeelight Dormitorio (ciclo circadiano):
 * 20:00 a 00:00 — Rojo 100% (protección de melatonina)
 * 00:00 a 08:00 — Rojo 50% (navegación nocturna)
 * Resto del día — Blanco cálido 2700K al 80%
+
+## 🔋 Gestión de energía (UPS)
+
+UPS Lyonn CTB-1200 monitoreada con NUT vía USB. Sensor de batería estimada calculado por voltaje.
+
+* Corte de luz → Notificación inmediata con autonomía estimada (~2h 40m)
+* Batería baja → Avisos progresivos al cruzar 75%, 50%, 25%
+* Batería crítica (15%) → Frena la UPS (`shutdown.return`) y apaga el servidor controladamente
+* Luz restablecida → Notificación de confirmación
+
+La sirena del sistema de seguridad se desactiva automáticamente durante cortes de luz para evitar bloqueos del enchufe Zigbee.
+
+## 🎛️ Botón Zigbee (Dormitorio)
+
+Control físico de la luz Yeelight con botón inalámbrico Zigbee (ZHA):
+
+* Pulsación simple o doble → Toggle encendido/apagado
+* Pulsación larga (luz en rojo) → Cambia a blanco cálido 2700K
+* Pulsación larga (luz en blanco o apagada) → Cambia a rojo 100%
 
 ## 🔐 Secretos
 
@@ -124,6 +144,10 @@ docker ps                                             # estado contenedores
 cd ~/home-automation && docker compose restart        # reiniciar stack
 df -h                                                 # espacio en disco
 du -sh ~/home-automation/recordings                   # peso de grabaciones
+docker exec nut-server upsc ups                       # estado de la UPS
+systemctl status cloudflared                          # estado del tunnel
+grep "Backup" ~/backup_log.txt | tail -5             # últimos backups
+journalctl -u cron --since "1 hour ago"              # actividad reciente del cron
 ```
 
 ## 🚫 Qué NO está en el repo

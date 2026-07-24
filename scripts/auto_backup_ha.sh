@@ -4,7 +4,7 @@ ENV_FILE="$(dirname "$0")/../.env"
 [ -f "$ENV_FILE" ] && export $(grep -v '^#' "$ENV_FILE" | xargs)
 
 # Configuración de rutas
-SOURCE="${PROJECT_PATH:-/home/daniel/homeAssistantProject}"
+SOURCE="${PROJECT_PATH:-/home/daniel/home-automation}"
 DEST="/home/daniel/backups"
 DATE=$(date +%Y-%m-%d_%H%M)
 FILENAME="ha_backup_${DATE}.tar.gz"
