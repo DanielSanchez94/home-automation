@@ -6,7 +6,11 @@ Acciones que hay que ejecutar manualmente en el servidor (lenovo-server).
 
 ## Pendiente
 
-_(Sin tareas pendientes actualmente)_
+- [ ] Refactorizar automatización "Sistema seguridad" para funcionar sin luz:
+  - Con luz (OL): disparo instantáneo por puertas, verificado (Sonoff+Tapo) por movimiento. Sirena + notificación.
+  - Sin luz (OB): disparo instantáneo por puertas, solo Sonoff para movimiento (Tapo no funciona sin 220V). Solo notificación (sirena inútil sin corriente).
+  - Bug actual: el `stop` en el else corta la ejecución y no envía notificación en modo batería.
+  - Nota: el modem tiene UPS pero pierde internet en cortes, las notificaciones llegarán cuando vuelva.
 
 ---
 
