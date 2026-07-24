@@ -12,8 +12,16 @@ FILENAME="ha_backup_${DATE}.tar.gz"
 # Crear carpeta de destino si no existe
 mkdir -p "$DEST"
 
-# Comprimir TODO excepto los videos pesados
-tar -czf "$DEST/$FILENAME" --exclude="$SOURCE/recordings" "$SOURCE"
+# Comprimir TODO excepto videos, .storage (root), logs y datos regenerables
+tar -czf "$DEST/$FILENAME" \
+  --exclude="$SOURCE/recordings" \
+  --exclude="$SOURCE/homeassistant/.storage" \
+  --exclude="$SOURCE/homeassistant/deps" \
+  --exclude="$SOURCE/homeassistant/tts" \
+  --exclude="$SOURCE/homeassistant/.cloud" \
+  --exclude="$SOURCE/homeassistant/home-assistant.log*" \
+  --warning=no-file-changed \
+  "$SOURCE"
 
 if [ $? -ne 0 ]; then
   echo "ERROR: el backup falló. No se borran backups anteriores."

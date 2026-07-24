@@ -26,10 +26,10 @@
 # Se ejecuta diariamente a las 3:00 AM.
 # Busca archivos en el directorio de grabaciones.
 # Nota: La línea del comando original estaba truncada. Se incluye tal cual se proporcionó.
-0 3 * * * /usr/bin/find /home/daniel/homeAssistantProject/recordings/ -type f -name "*.mp4" -mtime +60 -delete
+0 3 * * * /usr/bin/find /home/daniel/home-automation/recordings/ -type f -name "*.mp4*" -mtime +60 -delete
 
 # Tarea para realizar una copia de seguridad automática de Home Assistant.
 # Se ejecuta diariamente a las 4:00 AM.
 # Ejecuta el script de copia de seguridad y redirige su salida (estándar y errores)
 # a /home/daniel/backup_log.txt para un registro detallado.
-0 4 * * * /home/daniel/auto_backup_ha.sh >> /home/daniel/backup_log.txt 2>&1
+0 4 * * * /home/daniel/home-automation/scripts/auto_backup_ha.sh >> /home/daniel/backup_log.txt 2>&1
