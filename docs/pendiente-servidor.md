@@ -12,6 +12,8 @@ Acciones que hay que ejecutar manualmente en el servidor (lenovo-server).
   - Bug actual: el `stop` en el else corta la ejecución y no envía notificación en modo batería.
   - Nota: el modem tiene UPS pero pierde internet en cortes, las notificaciones llegarán cuando vuelva.
 
+- [x] Configurar healthchecks.io para monitoreo externo del servidor
+
 ---
 
 ## Pendiente futuro — Backup offsite con rclone

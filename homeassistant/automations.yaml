@@ -383,3 +383,45 @@
     target:
       entity_id: switch.enchufe
   mode: single
+
+- id: '1784857000000'
+  alias: 'Monitoreo: Batería baja sensores Zigbee'
+  description: Notifica cuando un sensor Zigbee baja del 20% de batería.
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.sensor_movimiento_snzb_03p_bateria
+    - sensor.sensor_puerta_ventana_bateria
+    - sensor.sensor_puerta_living_bateria
+    - sensor.boton_pulsador_bateria
+    - sensor.boton_sonof_bateria
+    below: 20
+  actions:
+  - action: notify.mobile_app_celu_bostezo
+    data:
+      title: "🪫 Batería baja"
+      message: "{{ trigger.to_state.name }}: {{ trigger.to_state.state }}%"
+      data:
+        priority: high
+  mode: single
+- id: '1784857100000'
+  alias: 'Monitoreo: Sensor Zigbee sin reportar'
+  description: Notifica si un sensor de seguridad lleva más de 6 horas sin cambiar
+    de estado (posible sensor muerto o fuera de rango).
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.sensor_movimiento_snzb_03p_ocupacion
+    - binary_sensor.sensor_puerta_living
+    - binary_sensor.sensor_puerta_ventana_garage
+    to: unavailable
+    for:
+      hours: 1
+  actions:
+  - action: notify.mobile_app_celu_bostezo
+    data:
+      title: "⚠️ Sensor sin respuesta"
+      message: "{{ trigger.to_state.name }} lleva más de 1 hora sin responder. Verificar batería o rango Zigbee."
+      data:
+        priority: high
+  mode: single

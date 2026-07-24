@@ -33,3 +33,8 @@
 # Ejecuta el script de copia de seguridad y redirige su salida (estándar y errores)
 # a /home/daniel/backup_log.txt para un registro detallado.
 0 4 * * * /home/daniel/home-automation/scripts/auto_backup_ha.sh >> /home/daniel/backup_log.txt 2>&1
+
+# Healthcheck externo: ping a healthchecks.io cada 5 minutos.
+# Si el servidor se cae o pierde internet, healthchecks.io notifica por mail.
+# Crear cuenta gratuita en https://healthchecks.io y reemplazar UUID_AQUI con el check UUID.
+*/5 * * * * /usr/bin/curl -fsS -m 10 --retry 3 https://hc-ping.com/f4fe06b2-96b2-4d16-9071-fcba3df51c6b > /dev/null 2>&1
