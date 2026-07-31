@@ -353,7 +353,7 @@
   actions:
   - action: automation.turn_on
     target:
-      entity_id: automation.sistema_seguridad
+      entity_id: automation.control_total_oficina_instantaneo
   mode: single
 - id: '1784856200000'
   alias: 'Webhook: Desactivar alarma'
@@ -367,7 +367,7 @@
   actions:
   - action: automation.turn_off
     target:
-      entity_id: automation.sistema_seguridad
+      entity_id: automation.control_total_oficina_instantaneo
   mode: single
 - id: '1784856300000'
   alias: 'Webhook: Apagar sirena'
