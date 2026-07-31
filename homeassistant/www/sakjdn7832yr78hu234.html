@@ -121,7 +121,7 @@
 
     <div id="toast" class="toast"></div>
     <div id="confirmOverlay" class="confirm-overlay" style="display:none">
-        <p>Vas a <strong>activar la alarma</strong>.<br>Tenes 60 segundos para salir.</p>
+        <p>Vas a <strong>activar la alarma</strong>.<br>Tenes 20 segundos para salir.</p>
         <div class="confirm-buttons">
             <button class="btn-confirm-yes" onclick="sendCommand('activar')">Activar</button>
             <button class="btn-confirm-no" onclick="closeConfirm()">Cancelar</button>
@@ -141,6 +141,7 @@
 
         function closeConfirm() {
             document.getElementById('confirmOverlay').style.display = 'none';
+            if (window._countdown) clearInterval(window._countdown);
         }
 
         async function sendCommand(action) {
@@ -148,11 +149,19 @@
             const buttons = document.querySelectorAll('button');
             buttons.forEach(b => b.disabled = true);
 
+            if (action === 'activar') {
+                showToast('Alarma se activa en 20s...', 'success');
+            }
+
             try {
                 const res = await fetch(WEBHOOKS[action], { method: 'POST' });
                 if (res.ok || res.status === 200) {
-                    showToast(getMensaje(action), 'success');
-                    updateStatus(action);
+                    if (action === 'activar') {
+                        startCountdown(20);
+                    } else {
+                        showToast(getMensaje(action), 'success');
+                        updateStatus(action);
+                    }
                 } else {
                     showToast('Error: ' + res.status, 'error');
                 }
@@ -161,6 +170,23 @@
             } finally {
                 buttons.forEach(b => b.disabled = false);
             }
+        }
+
+        function startCountdown(seconds) {
+            const statusEl = document.getElementById('status');
+            let remaining = seconds;
+            statusEl.textContent = 'Armando en ' + remaining + 's...';
+            statusEl.className = 'status status-armed';
+            window._countdown = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(window._countdown);
+                    statusEl.textContent = 'Armada';
+                    showToast('Alarma activada', 'success');
+                } else {
+                    statusEl.textContent = 'Armando en ' + remaining + 's...';
+                }
+            }, 1000);
         }
 
         function getMensaje(action) {

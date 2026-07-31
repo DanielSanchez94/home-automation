@@ -344,6 +344,7 @@
 - id: '1784856100000'
   alias: 'Webhook: Activar alarma'
   description: Permite activar la alarma desde el panel de control de terceros.
+    Espera 20 segundos para dar tiempo a salir.
   triggers:
   - trigger: webhook
     webhook_id: X_AhNFT-mL6g519Sw_d2WPl9TJwQ3pNH
@@ -351,9 +352,17 @@
     - POST
     local_only: false
   actions:
+  - delay:
+      seconds: 20
   - action: automation.turn_on
     target:
       entity_id: automation.control_total_oficina_instantaneo
+  - action: notify.mobile_app_celu_bostezo
+    data:
+      title: "🔒 Alarma activada"
+      message: "Alguien activó la alarma desde el panel web."
+      data:
+        priority: high
   mode: single
 - id: '1784856200000'
   alias: 'Webhook: Desactivar alarma'
@@ -368,6 +377,12 @@
   - action: automation.turn_off
     target:
       entity_id: automation.control_total_oficina_instantaneo
+  - action: notify.mobile_app_celu_bostezo
+    data:
+      title: "🔓 Alarma desactivada"
+      message: "Alguien desactivó la alarma desde el panel web."
+      data:
+        priority: high
   mode: single
 - id: '1784856300000'
   alias: 'Webhook: Apagar sirena'
