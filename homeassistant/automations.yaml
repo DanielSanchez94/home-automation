@@ -1,7 +1,9 @@
 - id: movimiento_prendo_luces
   alias: Sistema seguridad
-  description: Sirena solo si hay luz (OL). Notificación crítica si hay corte (OB)
-    para evitar bloqueos del enchufe Zigbee.
+  description: >
+    Sirena + notificación si hay intrusión y ambos están fuera de casa.
+    Si el robot está limpiando y se detecta movimiento por Sonoff+Tapo: solo notificación.
+    En corte de luz (OB): no activa sirena, solo notifica.
   triggers:
   - trigger: state
     entity_id:
@@ -23,38 +25,58 @@
       minutes: 2
   actions:
   - choose:
+
+    # --- CASO: alguien entró ---
     - conditions:
       - condition: trigger
         id: alguien_entro
+      # Ambos teléfonos fuera de casa
       - condition: template
-        value_template: "{{ states('sensor.sm_a546e_wi_fi_connection') not in ['limalimon','naranjamandarina']
-          and \n   states('sensor.iphone_de_agostina_ssid') not in ['limalimon','naranjamandarina']
-          }}\n"
+        value_template: >
+          {{ states('sensor.sm_a546e_wi_fi_connection') not in ['limalimon','naranjamandarina']
+          and states('sensor.iphone_de_agostina_ssid') not in ['limalimon','naranjamandarina'] }}
+      # El trigger es una puerta O la combinación Sonoff+Tapo
       - condition: or
         conditions:
         - condition: template
-          value_template: "{{ trigger.entity_id in [\n  'binary_sensor.sensor_puerta_living',\n
-            \ 'binary_sensor.sensor_puerta_ventana_garage'\n] }}\n"
+          value_template: >
+            {{ trigger.entity_id in [
+              'binary_sensor.sensor_puerta_living',
+              'binary_sensor.sensor_puerta_ventana_garage'
+            ] }}
         - condition: and
           conditions:
-          - condition: state
-            entity_id: sensor.ups_datos_de_estado
-            state: OL
           - condition: state
             entity_id: binary_sensor.sensor_movimiento_snzb_03p_ocupacion
             state: 'on'
           - condition: state
             entity_id: binary_sensor.movimiento_tapo_living_10s
             state: 'on'
-        - condition: and
-          conditions:
-          - condition: state
-            entity_id: sensor.ups_datos_de_estado
-            state: OB
-          - condition: state
-            entity_id: binary_sensor.sensor_movimiento_snzb_03p_ocupacion
-            state: 'on'
       sequence:
+
+      # Sub-caso: robot limpiando + movimiento Sonoff+Tapo → solo notificar
+      - if:
+        - condition: state
+          entity_id: vacuum.xiaomi_d109gl_32b4_robot_cleaner
+          state:
+          - cleaning
+          - returning
+        - condition: template
+          value_template: >
+            {{ trigger.entity_id not in [
+              'binary_sensor.sensor_puerta_living',
+              'binary_sensor.sensor_puerta_ventana_garage'
+            ] }}
+        then:
+        - action: notify.mobile_app_celu_bostezo
+          data:
+            title: "🤖 Movimiento detectado (Hilario limpiando)"
+            message: "{{ trigger.to_state.name }} detectó movimiento. El robot está activo, no se activó la sirena."
+            data:
+              priority: high
+        - stop: Robot limpiando, movimiento esperado.
+
+      # Sub-caso: corte de luz → no activar sirena
       - if:
         - condition: state
           entity_id: sensor.ups_datos_de_estado
@@ -63,26 +85,32 @@
         - action: switch.turn_on
           target:
             entity_id: switch.enchufe
-        else:
-        - stop: 'Corte de luz detectado: se omite activación de sirena.'
-      - data:
-          title: "\U0001F6A8 ALARMA {% if is_state('sensor.ups_datos_de_estado', 'OB')
-            %}(MODO BATERÍA){% endif %}"
-          message: "{{ trigger.to_state.name }} activado. {% if is_state('sensor.ups_datos_de_estado',
-            'OB') %}\n  ⚠️ Sirena NO encendida por falta de red eléctrica.\n{% else
-            %}\n  \U0001F50A Sirena ENCENDIDA.\n{% endif %}"
+
+      # Notificación a Dani
+      - action: notify.mobile_app_celu_bostezo
+        data:
+          title: "🚨 ALARMA {% if is_state('sensor.ups_datos_de_estado', 'OB') %}(MODO BATERÍA){% endif %}"
+          message: >
+            {{ trigger.to_state.name }} activado.
+            {% if is_state('sensor.ups_datos_de_estado', 'OB') %}
+            ⚠️ Sirena NO encendida por falta de red eléctrica.
+            {% else %}
+            🔊 Sirena ENCENDIDA.
+            {% endif %}
           data:
             priority: high
             ttl: 0
-        action: notify.mobile_app_celu_bostezo
-      - data:
-          title: "\U0001F6A8 ALARMA ACTIVADA"
-          message: 'Alerta: {{ trigger.to_state.name }} activado.'
+      # Notificación a Agostina
+      - action: notify.mobile_app_iphone_de_agostina
+        data:
+          title: "🚨 ALARMA ACTIVADA"
+          message: "Alerta: {{ trigger.to_state.name }} activado."
           data:
             push:
               sound: default
             priority: high
-        action: notify.mobile_app_iphone_de_agostina
+
+    # --- CASO: no hay nadie → apagar sirena ---
     - conditions:
       - condition: trigger
         id: nadie_en_la_oficina
@@ -90,6 +118,7 @@
       - action: switch.turn_off
         target:
           entity_id: switch.enchufe
+
   mode: restart
 - id: '1773681158191'
   alias: 'Iluminación Inteligente: Yeelight Dormitorio'

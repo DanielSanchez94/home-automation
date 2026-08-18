@@ -42,10 +42,29 @@ Configuración de mi instalación de **Home Assistant** + servicios asociados
 
 Lógica de presencia basada en SSIDs de confianza: `limalimon`, `naranjamandarina`.
 
-* Sirena (enchufe Zigbee) y notificaciones se activan si ningún teléfono está en la red
-* Disparo instantáneo: apertura de puerta living o ventana garage
-* Disparo verificado: detección simultánea en sensor Sonoff + cámara Tapo (evita falsos positivos)
-* Grabación automática de clips de 30s con 2s de lookback, solo en modo ausencia
+Cuando ambos teléfonos están fuera de la red, el sistema evalúa el tipo de evento:
+
+| Situación | Sirena | Notificación |
+|-----------|:------:|:------------:|
+| Puerta/ventana abierta | ✅ | ✅ a Dani y Agostina |
+| Movimiento Sonoff + Tapo (nadie en casa) | ✅ | ✅ |
+| Movimiento Sonoff + Tapo con **robot limpiando** | ❌ | ✅ "Hilario limpiando" |
+| Cualquier evento con **corte de luz** (OB) | ❌ | ✅ "(MODO BATERÍA)" |
+
+**Dispositivos involucrados:**
+* Sensor de movimiento: Sonoff SNZB-03P (Zigbee)
+* Sensores de apertura: puerta living y ventana garage (Zigbee)
+* Cámara: Tapo C200 (detección de movimiento vía ONVIF)
+* Sirena: enchufe Zigbee (se activa/desactiva según el escenario)
+* Robot aspirador: Xiaomi Hilario — si está en estado `cleaning` o `returning`, el movimiento por sensor+cámara no dispara la sirena para evitar falsas alarmas
+
+**Panel de control para terceros:** `https://homesmart.ar/local/sakjdn7832yr78hu234.html`
+* Activar alarma (con delay de 20 segundos para salir)
+* Desactivar alarma
+* Apagar sirena de emergencia
+* Notifica a Dani al activar/desactivar
+
+Grabación automática de clips de 30s con 2s de lookback en modo ausencia.
 
 ## 💡 Iluminación inteligente
 
