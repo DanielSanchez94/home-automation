@@ -47,14 +47,22 @@ Cuando ambos teléfonos están fuera de la red, el sistema evalúa el tipo de ev
 | Situación | Sirena | Notificación |
 |-----------|:------:|:------------:|
 | Puerta/ventana abierta | ✅ | ✅ a Dani y Agostina |
-| Movimiento Sonoff + Tapo (nadie en casa) | ✅ | ✅ |
+| Movimiento Sonoff + Tapo (con luz) | ✅ | ✅ |
 | Movimiento Sonoff + Tapo con **robot limpiando** | ❌ | ✅ "Hilario limpiando" |
-| Cualquier evento con **corte de luz** (OB) | ❌ | ✅ "(MODO BATERÍA)" |
+| Movimiento Sonoff solo (corte de luz, OB) | ❌ | ✅ "(MODO BATERÍA)" |
+| Puerta/ventana abierta (corte de luz, OB) | ❌ | ✅ "(MODO BATERÍA)" |
+
+**Durante un corte de luz:**
+- El servidor sigue en UPS (~2h 40m de autonomía)
+- Los sensores Zigbee siguen funcionando (batería)
+- La Tapo C200 se apaga (requiere 220V) — la verificación cruzada Sonoff+Tapo no aplica
+- La sirena se desactiva (el enchufe Zigbee no tiene 220V)
+- El modem tiene UPS + **dongle 4G como failover automático** — las notificaciones push llegan igual
 
 **Dispositivos involucrados:**
 * Sensor de movimiento: Sonoff SNZB-03P (Zigbee)
 * Sensores de apertura: puerta living y ventana garage (Zigbee)
-* Cámara: Tapo C200 (detección de movimiento vía ONVIF)
+* Cámara: Tapo C200 (detección de movimiento vía ONVIF, solo con luz)
 * Sirena: enchufe Zigbee (se activa/desactiva según el escenario)
 * Robot aspirador: Xiaomi Hilario — si está en estado `cleaning` o `returning`, el movimiento por sensor+cámara no dispara la sirena para evitar falsas alarmas
 
