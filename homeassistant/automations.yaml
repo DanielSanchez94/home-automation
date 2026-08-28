@@ -469,3 +469,28 @@
       data:
         priority: high
   mode: single
+
+- id: '1784858000000'
+  alias: 'Secarropas: Apagar a los 10 minutos'
+  description: >
+    Cuando el secarropas supera 100W (está funcionando), espera 10 minutos
+    y apaga el enchufe automáticamente para evitar olvidos.
+  triggers:
+  - trigger: numeric_state
+    entity_id: sensor.enchufe_heladera_potencia
+    above: 100
+    for:
+      minutes: 1
+  actions:
+  - delay:
+      minutes: 9
+  - action: switch.turn_off
+    target:
+      entity_id: switch.enchufe_heladera
+  - action: notify.mobile_app_celu_bostezo
+    data:
+      title: "🌀 Secarropas apagado"
+      message: "El secarropas estuvo 10 minutos encendido y fue apagado automáticamente."
+      data:
+        priority: high
+  mode: single
