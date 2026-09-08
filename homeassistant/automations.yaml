@@ -471,32 +471,47 @@
   mode: single
 
 - id: '1784858000000'
-  alias: 'Secarropas: Apagar a los 10 minutos'
+  alias: 'Secarropas: Apagar a los 8 minutos'
   description: >
-    Cuando el secarropas supera 100W (está funcionando), espera 10 minutos
+    Cuando el secarropas supera 100W (está funcionando), espera 8 minutos
     y apaga el enchufe automáticamente para evitar olvidos.
-    Si el usuario lo apaga manualmente antes, no hace nada.
+    Si el usuario lo apaga manualmente antes, cancela el timer sin notificar.
   triggers:
   - trigger: numeric_state
     entity_id: sensor.enchufe_heladera_potencia
     above: 100
     for:
       minutes: 1
+    id: secarropas_encendido
+  - trigger: numeric_state
+    entity_id: sensor.enchufe_heladera_potencia
+    below: 50
+    id: secarropas_apagado_manual
   actions:
-  - delay:
-      minutes: 7
-  - if:
-    - condition: numeric_state
-      entity_id: sensor.enchufe_heladera_potencia
-      above: 100
-    then:
-    - action: switch.turn_off
-      target:
-        entity_id: switch.enchufe_heladera
-    - action: notify.mobile_app_celu_bostezo
-      data:
-        title: "🌀 Secarropas apagado"
-        message: "El secarropas estuvo 10 minutos encendido y fue apagado automáticamente."
-        data:
-          priority: high
-  mode: single
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: secarropas_encendido
+      sequence:
+      - delay:
+          minutes: 7
+      - if:
+        - condition: numeric_state
+          entity_id: sensor.enchufe_heladera_potencia
+          above: 100
+        then:
+        - action: switch.turn_off
+          target:
+            entity_id: switch.enchufe_heladera
+        - action: notify.mobile_app_celu_bostezo
+          data:
+            title: "🌀 Secarropas apagado"
+            message: "El secarropas estuvo 8 minutos encendido y fue apagado automáticamente."
+            data:
+              priority: high
+    - conditions:
+      - condition: trigger
+        id: secarropas_apagado_manual
+      sequence:
+      - stop: "Usuario apagó el secarropas manualmente."
+  mode: restart
