@@ -8,7 +8,8 @@ homeassistant:
 logger:
   default: warning
   logs:
-    custom_components.tapo_control: debug
+    custom_components.tapo_control: warning
+    custom_components.xiaomi_miot: error
 
 # Loads default set of integrations. Do not remove.
 default_config:

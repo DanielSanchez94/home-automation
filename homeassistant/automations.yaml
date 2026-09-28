@@ -515,3 +515,21 @@
       sequence:
       - stop: "Usuario apagó el secarropas manualmente."
   mode: restart
+
+- id: '1784859000000'
+  alias: 'Comedor: Apagar luz a las 7am'
+  description: >
+    Si la luz del comedor quedó encendida, la apaga automáticamente a las 07:00
+    para evitar que quede prendida de la noche a la mañana.
+  triggers:
+  - trigger: time
+    at: '07:00:00'
+  conditions:
+  - condition: state
+    entity_id: light.foco_comedor
+    state: 'on'
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id: light.foco_comedor
+  mode: single
