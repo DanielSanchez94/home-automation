@@ -22,11 +22,15 @@
 # 
 # m h  dom mon dow   command
 
-# Tarea para eliminar grabaciones antiguas de Home Assistant.
+# Tarea para eliminar grabaciones antiguas de Home Assistant (retención 60 días).
 # Se ejecuta diariamente a las 3:00 AM.
-# Busca archivos en el directorio de grabaciones.
-# Nota: La línea del comando original estaba truncada. Se incluye tal cual se proporcionó.
-0 3 * * * /usr/bin/find /home/daniel/home-automation/recordings/ -type f -name "*.mp4*" -mtime +60 -delete
+# IMPORTANTE: el borrado se hace vía `docker exec` dentro del contenedor homeassistant,
+# porque los .mp4 los crea HA como root (uid=0) y el usuario `daniel` NO tiene permiso
+# de escritura sobre el directorio recordings/. Un `find -delete` desde el host fallaba
+# en silencio. Dentro del contenedor, root sí puede borrar.
+# Ruta dentro del contenedor: /media/recordings (volumen montado desde ./recordings del host).
+# La salida se registra en cleanup_recordings_log.txt para detectar fallos futuros.
+0 3 * * * /usr/bin/docker exec homeassistant find /media/recordings -type f -name "*.mp4*" -mtime +60 -delete >> /home/daniel/cleanup_recordings_log.txt 2>&1
 
 # Tarea para realizar una copia de seguridad automática de Home Assistant.
 # Se ejecuta diariamente a las 4:00 AM.

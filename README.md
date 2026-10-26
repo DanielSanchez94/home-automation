@@ -42,15 +42,24 @@ Configuración de mi instalación de **Home Assistant** + servicios asociados
 
 Lógica de presencia basada en SSIDs de confianza: `limalimon`, `naranjamandarina`.
 
-Cuando ambos teléfonos están fuera de la red, el sistema evalúa el tipo de evento:
+**La alarma solo actúa si AMBOS teléfonos están fuera de la red.** Si alguno está en casa, no pasa nada.
 
-| Situación | Sirena | Notificación |
-|-----------|:------:|:------------:|
-| Puerta/ventana abierta | ✅ | ✅ a Dani y Agostina |
-| Movimiento Sonoff + Tapo (con luz) | ✅ | ✅ |
-| Movimiento Sonoff + Tapo con **robot limpiando** | ❌ | ✅ "Hilario limpiando" |
-| Movimiento Sonoff solo (corte de luz, OB) | ❌ | ✅ "(MODO BATERÍA)" |
-| Puerta/ventana abierta (corte de luz, OB) | ❌ | ✅ "(MODO BATERÍA)" |
+Con ambos fuera, el sistema reacciona según el evento, si el robot Hilario limpia y si hay luz:
+
+| Evento detectado | ¿Hilario limpiando? | ¿Hay luz? | Sirena | Notificación |
+|------------------|:-------------------:|:---------:|:------:|--------------|
+| **Puerta o ventana abierta** (living / garage) | no importa | ✅ sí | 🔊 suena | 🚨 Dani + Agostina |
+| **Puerta o ventana abierta** (living / garage) | no importa | ❌ corte | 🔇 no suena | 🚨 Dani + Agostina "(MODO BATERÍA)" |
+| **Movimiento** Sonoff **+** Tapo (verificación cruzada) | no | ✅ sí | 🔊 suena | 🚨 Dani + Agostina |
+| **Movimiento** Sonoff **+** Tapo (verificación cruzada) | no | ❌ corte | 🔇 no suena | 🚨 Dani + Agostina "(MODO BATERÍA)" |
+| **Movimiento** Sonoff **+** Tapo | sí | no importa | 🔇 no suena | 🤖 Dani "Hilario limpiando" |
+| **Movimiento** Sonoff solo (sin confirmación de Tapo) | no importa | no importa | 🔇 no suena | — nada |
+
+**Cómo leer la tabla:**
+- **Puerta/ventana = máxima prioridad.** Siempre dispara alarma (sirena + notificación), sin importar el robot. Lo único que apaga la sirena es un corte de luz.
+- **Movimiento** nunca dispara solo: necesita que el sensor Sonoff **y** la cámara Tapo coincidan. Si solo salta el Sonoff, no pasa nada (evita falsas alarmas).
+- **Robot Hilario** solo silencia la sirena en el caso de *movimiento*. Nunca silencia una puerta/ventana.
+- **Corte de luz (UPS en batería)** apaga la sirena siempre (el enchufe Zigbee se queda sin 220V), pero la notificación igual llega por el failover 4G.
 
 **Durante un corte de luz:**
 - El servidor sigue en UPS (~2h 40m de autonomía)
