@@ -76,11 +76,13 @@
               priority: high
         - stop: Robot limpiando, movimiento esperado.
 
-      # Sub-caso: corte de luz → no activar sirena
+      # Sub-caso: enciende sirena salvo que esté en corte de luz (batería).
+      # Usa split() para ser robusto a estados compuestos de la UPS (OL CHRG, OL TRIM, etc.):
+      # solo 'OB' (on battery) inhibe la sirena; cualquier variante 'OL...' la activa.
       - if:
-        - condition: state
-          entity_id: sensor.ups_datos_de_estado
-          state: OL
+        - condition: template
+          value_template: >
+            {{ 'OB' not in states('sensor.ups_datos_de_estado').split() }}
         then:
         - action: switch.turn_on
           target:
@@ -89,10 +91,10 @@
       # Notificación a Dani
       - action: notify.mobile_app_celu_bostezo
         data:
-          title: "🚨 ALARMA {% if is_state('sensor.ups_datos_de_estado', 'OB') %}(MODO BATERÍA){% endif %}"
+          title: "🚨 ALARMA {% if 'OB' in states('sensor.ups_datos_de_estado').split() %}(MODO BATERÍA){% endif %}"
           message: >
             {{ trigger.to_state.name }} activado.
-            {% if is_state('sensor.ups_datos_de_estado', 'OB') %}
+            {% if 'OB' in states('sensor.ups_datos_de_estado').split() %}
             ⚠️ Sirena NO encendida por falta de red eléctrica.
             {% else %}
             🔊 Sirena ENCENDIDA.
